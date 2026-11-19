@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peer dashboard</title>
+<script src="config.js"></script>
+<style>
+  :root { --navy:#23215e; --magenta:#e0007a; --line:#e3e3ea; --alt:#f6f6fa; --good:#1d7a46; --bad:#b3261e; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial, Helvetica, sans-serif; color:#1c1c2b; background:#fff; }
+  .hidden { display:none !important; }
+  button { font:inherit; cursor:pointer; }
+
+  /* Login */
+  #login { min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--alt); }
+  #loginForm { background:#fff; border:1px solid var(--line); padding:32px; width:340px; }
+  #loginForm h1 { color:var(--magenta); font-size:24px; margin:0 0 20px; }
+  #loginForm label { display:block; font-size:14px; margin-bottom:14px; }
+  #loginForm input { display:block; width:100%; margin-top:4px; padding:8px; border:1px solid #c9c9d6; font:inherit; }
+  #loginForm button { width:100%; padding:10px; background:var(--navy); color:#fff; border:0; }
+  .msg { color:var(--bad); font-size:13px; min-height:1em; margin:12px 0 0; }
+
+  /* Dashboard */
+  #app { padding:28px 40px; }
+  header { display:flex; justify-content:space-between; align-items:center; }
+  header h1 { color:var(--magenta); font-size:30px; margin:0; }
+  header .user { font-size:14px; color:#555; }
+  .ghost { background:#fff; border:1px solid var(--navy); color:var(--navy); padding:6px 12px; margin-left:12px; }
+  .note { color:#555; font-size:14px; margin:8px 0 20px; }
+  .toggle { display:inline-flex; border:1px solid var(--navy); margin-bottom:20px; }
+  .toggle button { background:#fff; color:var(--navy); border:0; padding:8px 14px; font-weight:bold; }
+  .toggle button + button { border-left:1px solid var(--navy); }
+  .toggle button.on { background:var(--navy); color:#fff; }
+
+  table { border-collapse:collapse; width:100%; font-size:14px; }
+  th { background:var(--navy); color:#fff; padding:10px 12px; text-align:right; vertical-align:bottom; }
+  th:first-child, td:first-child { text-align:left; }
+  td { padding:10px 12px; text-align:right; border-bottom:1px solid var(--line); }
+  tbody tr:nth-child(even) td { background:var(--alt); }
+  tr.self td { background:#fdeaf4 !important; font-weight:bold; }
+  tfoot td { font-weight:bold; border-top:2px solid var(--navy); background:#fff; }
+  .good { color:var(--good); }
+  .bad { color:var(--bad); }
+  .legend { font-size:13px; color:#555; margin-top:12px; }
+</style>
+</head>
+<body>
+
+<div id="login" class="hidden">
+  <form id="loginForm">
+    <h1>Peer dashboard</h1>
+    <label>Email <input type="email" id="email" required autocomplete="username"></label>
+    <label>Password <input type="password" id="password" required autocomplete="current-password"></label>
+    <button type="submit">Sign in</button>
+    <p id="loginMsg" class="msg"></p>
+  </form>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>Peer comparison</h1>
+    <div><span class="user" id="who"></span><button class="ghost" id="signout">Sign out</button></div>
+  </header>
+  <p class="note">SAMPLE DATA: made-up companies and numbers for testing the layout. Real data will come from your Excel file.</p>
+  <div class="toggle" id="periods"></div>
+  <table>
+    <thead id="head"></thead>
+    <tbody id="body"></tbody>
+    <tfoot id="foot"></tfoot>
+  </table>
+  <p class="legend">Peer mean and median exclude your company. Rank is your company's position among all companies shown (1 = best).
+    Your company's figures are <span class="good">green</span> when better than the peer median and <span class="bad">red</span> when worse.</p>
+</div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+const cfg = window.APP_CONFIG || {};
+const $ = (id) => document.getElementById(id);
+
+if (!cfg.SUPABASE_URL || !cfg.SUPABASE_PUBLISHABLE_KEY || cfg.SUPABASE_PUBLISHABLE_KEY.startsWith("PASTE_")) {
+  $("login").classList.remove("hidden");
+  $("loginMsg").textContent = "Setup needed: add your Supabase URL and publishable key to config.js.";
+  $("loginForm").querySelector("button").disabled = true;
+  throw new Error("Missing config");
+}
+
+const supabase = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY);
+
+// ---------- Metrics and periods ----------
+const METRICS = [
+  { key: "revenue",       label: "Revenue ($M)",    fmt: "num", better: "high" },
+  { key: "premiums",      label: "Premiums ($M)",   fmt: "num", better: "high" },
+  { key: "premGrowth",    label: "Premium growth",  fmt: "pct", better: "high" },
+  { key: "netIncome",     label: "Net income ($M)", fmt: "num", better: "high" },
+  { key: "lossRatio",     label: "Loss ratio",      fmt: "pct", better: "low"  },
+  { key: "combinedRatio", label: "Combined ratio",  fmt: "pct", better: "low"  },
+  { key: "roe",           label: "ROE",             fmt: "pct", better: "high" },
+  { key: "bvpsGrowth",    label: "BVPS growth",     fmt: "pct", better: "high" },
+];
+const PERIODS = [
+  { id: "Q",   label: "Latest quarter", period: "Q3 2026",     scale: 1 },
+  { id: "YTD", label: "YTD",            period: "9M 2026",     scale: 3 },
+  { id: "LTM", label: "LTM",            period: "LTM Q3 2026", scale: 4 },
+  { id: "FY",  label: "FY",             period: "FY 2025",     scale: 4 },
+];
+
+// ---------- Sample data (replaced by Supabase data later) ----------
+function seeded(seed) {
+  return () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+const COMPANIES = [
+  { name: "My company (sample)", self: true, size: 900 },
+  { name: "Peer A", size: 4200 }, { name: "Peer B", size: 3600 }, { name: "Peer C", size: 2500 },
+  { name: "Peer D", size: 1800 }, { name: "Peer E", size: 1200 }, { name: "Peer F", size: 700 },
+  { name: "Peer G", size: 480 },  { name: "Peer H", size: 420 },
+];
+function sampleData() {
+  const rows = [];
+  PERIODS.forEach((p, pi) => COMPANIES.forEach((c, ci) => {
+    const r = seeded(1000 + ci * 37 + pi * 101);
+    const between = (a, b) => a + (b - a) * r();
+    const revenue = c.size * p.scale * between(0.9, 1.1);
+    const lossRatio = between(0.47, 0.70);
+    rows.push({
+      company: c.name, self: !!c.self, periodId: p.id, period: p.period,
+      revenue, premiums: revenue * between(0.82, 0.95), premGrowth: between(-0.10, 0.15),
+      netIncome: revenue * between(0.05, 0.20), lossRatio, combinedRatio: lossRatio + between(0.27, 0.36),
+      roe: between(0.06, 0.22), bvpsGrowth: between(-0.05, 0.12),
+    });
+  }));
+  return rows;
+}
+const DATA = sampleData();
+
+// ---------- Helpers ----------
+const fmt = (v, kind) => v == null || isNaN(v) ? "–"
+  : kind === "pct" ? (v < 0 ? `(${(-v * 100).toFixed(1)}%)` : `${(v * 100).toFixed(1)}%`)
+  : Math.round(v).toLocaleString("en-US");
+const mean = (a) => a.reduce((s, x) => s + x, 0) / a.length;
+const median = (a) => { const s = [...a].sort((x, y) => x - y), m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const isBetter = (a, b, better) => better === "high" ? a > b : a < b;
+
+let periodId = "Q";
+try { periodId = localStorage.getItem("periodId") || "Q"; } catch {}
+
+// ---------- Render ----------
+function render() {
+  $("periods").innerHTML = PERIODS.map(p =>
+    `<button data-id="${p.id}" class="${p.id === periodId ? "on" : ""}">${p.label}</button>`).join("");
+
+  $("head").innerHTML = `<tr><th>Company</th><th>Period</th>${METRICS.map(m => `<th>${m.label}</th>`).join("")}</tr>`;
+
+  const rows = DATA.filter(r => r.periodId === periodId)
+    .sort((a, b) => (b.self - a.self) || (b.revenue - a.revenue));
+  const self = rows.find(r => r.self);
+  const peers = rows.filter(r => !r.self);
+  const stats = {};
+  METRICS.forEach(m => {
+    const vals = peers.map(r => r[m.key]).filter(v => v != null && !isNaN(v));
+    stats[m.key] = { mean: mean(vals), median: median(vals) };
+  });
+
+  $("body").innerHTML = rows.map(r => `<tr class="${r.self ? "self" : ""}"><td>${r.company}</td><td>${r.period}</td>${
+    METRICS.map(m => {
+      let cls = "";
+      if (r.self) cls = isBetter(r[m.key], stats[m.key].median, m.better) ? "good" : "bad";
+      return `<td class="${cls}">${fmt(r[m.key], m.fmt)}</td>`;
+    }).join("")}</tr>`).join("");
+
+  const rankCells = METRICS.map(m => {
+    if (!self) return "<td>–</td>";
+    const rank = rows.filter(r => !r.self && isBetter(r[m.key], self[m.key], m.better)).length + 1;
+    return `<td>${rank} of ${rows.length}</td>`;
+  }).join("");
+
+  $("foot").innerHTML =
+    `<tr><td>Peer mean</td><td></td>${METRICS.map(m => `<td>${fmt(stats[m.key].mean, m.fmt)}</td>`).join("")}</tr>
+     <tr><td>Peer median</td><td></td>${METRICS.map(m => `<td>${fmt(stats[m.key].median, m.fmt)}</td>`).join("")}</tr>
+     <tr><td>My company rank</td><td></td>${rankCells}</tr>`;
+}
+
+$("periods").addEventListener("click", (e) => {
+  const id = e.target.dataset.id; if (!id) return;
+  periodId = id; try { localStorage.setItem("periodId", id); } catch {}
+  render();
+});
+
+// ---------- Login ----------
+async function show(session) {
+  if (session) {
+    $("login").classList.add("hidden"); $("app").classList.remove("hidden");
+    $("who").textContent = session.user.email; render();
+  } else {
+    $("app").classList.add("hidden"); $("login").classList.remove("hidden");
+  }
+}
+$("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault(); $("loginMsg").textContent = "";
+  const { error } = await supabase.auth.signInWithPassword({ email: $("email").value.trim(), password: $("password").value });
+  if (error) $("loginMsg").textContent = error.message;
+});
+$("signout").addEventListener("click", () => supabase.auth.signOut());
+supabase.auth.onAuthStateChange((_event, session) => show(session));
+const { data } = await supabase.auth.getSession();
+show(data.session);
+</script>
+</body>
+</html>
