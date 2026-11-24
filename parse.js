@@ -107,3 +107,63 @@ export function parseWorkbook(XLSX, wb, fileName = "") {
   if (!companies.length) throw new Error("No company tabs found. Each company tab needs a 'Metric' header row and a 'Period #' row.");
   return { fileName, parsedAt: new Date().toISOString(), periods, companies, warnings };
 }
+
+// ---------- Reserve workbook (P&C Peer Reserve Development Components) ----------
+const BAL_COLS = {
+  "ticker": "ticker", "fiscal year": "fy", "quarter": "q", "basis": "basis",
+  "gross loss reserves": "gross", "reinsurance recoverable on unpaid losses": "recov", "net loss reserves": "net",
+  "net case reserves": "netCase", "net ibnr": "netIbnr", "gross case reserves": "grossCase", "gross ibnr": "grossIbnr",
+  "opening net loss reserves": "open", "net paid losses (quarter)": "paid",
+  "net prior-year development (quarter)": "pyd", "net prior-year development (balance basis)": "pydB",
+  "reserves discounted (y/n)": "disc", "case/ibnr disclosed (quarterly / annual only / not disclosed)": "caseIbnr",
+  "source document and page": "source", "notes": "notes",
+};
+const DEV_COLS = {
+  "ticker": "ticker", "fiscal year": "fy", "quarter": "q", "segment or line (as reported)": "seg", "line category": "cat",
+  "accident years (as reported)": "ay", "amount": "amt", "gross or net": "gn", "event tag": "tag",
+  "verbatim quote": "quote", "source document and page": "source",
+};
+const BAL_NUM = new Set(["fy", "q", "gross", "recov", "net", "netCase", "netIbnr", "grossCase", "grossIbnr", "open", "paid", "pyd", "pydB"]);
+export const isReserveWorkbook = (wb) => wb.SheetNames.includes("Reserve Balances") && wb.SheetNames.includes("Reserve Development");
+
+function readTable(XLSX, ws, colMap, numKeys, sheet, warnings) {
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
+  const hdr = (rows[0] || []).map((h) => norm(h));
+  const pos = {};
+  for (const [label, key] of Object.entries(colMap)) {
+    const i = hdr.indexOf(label);
+    if (i < 0) warnings.push(`${sheet}: column "${label}" not found.`); else pos[key] = i;
+  }
+  const out = [];
+  rows.slice(1).forEach((r, n) => {
+    if (!r || r[pos.ticker] === null || r[pos.ticker] === undefined || r[pos.ticker] === "") return;
+    const o = {};
+    for (const [key, i] of Object.entries(pos)) {
+      let v = r[i];
+      if (v === "" || v === undefined) v = null;
+      if (numKeys.has(key) && v !== null && typeof v !== "number") {
+        const p = Number(String(v).replace(/,/g, ""));
+        if (!isNaN(p) && String(v).trim() !== "") v = p;
+        else { warnings.push(`${sheet} row ${n + 2}, ${key}: "${v}" is text, treated as blank.`); v = null; }
+      }
+      o[key] = typeof v === "string" ? v.trim() : v;
+    }
+    o.ticker = String(o.ticker);
+    out.push(o);
+  });
+  return out;
+}
+
+export function parseReserveWorkbook(XLSX, wb, fileName = "") {
+  const warnings = [];
+  const balances = readTable(XLSX, wb.Sheets["Reserve Balances"], BAL_COLS, BAL_NUM, "Reserve Balances", warnings);
+  const dev = readTable(XLSX, wb.Sheets["Reserve Development"], DEV_COLS, new Set(["fy", "q", "amt"]), "Reserve Development", warnings);
+  const names = {};
+  if (wb.Sheets["Overview"]) {
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets["Overview"], { header: 1, raw: true, defval: null });
+    for (const r of rows) if (r && r[0] && r[1] && /^[A-Z.]{1,6}$/.test(String(r[1]).trim())) names[String(r[1]).trim()] = String(r[0]).trim();
+  }
+  if (!balances.length) throw new Error("The Reserve Balances tab has no rows.");
+  const keys = new Set(); balances.forEach((b) => { const k = `${b.ticker}|${b.fy}|${b.q}`; if (keys.has(k)) warnings.push(`Reserve Balances: duplicate row for ${b.ticker} ${b.fy} Q${b.q}.`); keys.add(k); });
+  return { kind: "reserves", fileName, parsedAt: new Date().toISOString(), balances, dev, names, warnings };
+}

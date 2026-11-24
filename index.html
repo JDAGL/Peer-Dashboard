@@ -89,6 +89,51 @@
   .viz-tip-row strong { color:#0b0b0b; font-variant-numeric:tabular-nums; } .viz-tip-label { color:#52514e; }
   .viz-tip-key { width:12px; height:2px; border-radius:1px; flex:none; }
 
+  .section-title { font-size:18px; color:var(--navy); margin:28px 0 4px; padding-top:14px; border-top:2px solid var(--line); }
+  .summary-card .tiles { margin-bottom:4px; }
+  ul.notable { list-style:none; padding:0; margin:4px 0; }
+  ul.notable li { padding:9px 0; border-bottom:1px solid var(--line); cursor:pointer; }
+  ul.notable li:hover { background:#fafaf8; }
+  .notable-head { font-size:14px; } .notable-head strong { margin-right:2px; }
+  .notable-dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:8px; vertical-align:middle; }
+  .notable-quote { font-style:italic; font-size:12.5px; color:#3a3a36; margin:4px 0 2px 17px; } .notable-src { font-size:11px; color:#898781; margin-left:17px; }
+  table.scorecard { width:auto; min-width:760px; font-size:13px; }
+  table.scorecard th { cursor:default; text-align:left; font-size:12px; min-width:0; white-space:normal; max-width:170px; }
+  table.scorecard td { text-align:left; padding:5px 10px; } table.scorecard td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  table.scorecard td .tk { display:inline; margin-left:6px; color:#898781; font-size:11px; }
+  table.scorecard tr.cohort-row td { background:#efeef6 !important; font-weight:700; color:var(--navy); padding-top:8px; }
+  table.scorecard .cohort-stat { font-weight:400; color:#52514e; font-size:12px; }
+  table.scorecard tbody tr:not(.cohort-row) { cursor:pointer; } table.scorecard tbody tr:not(.cohort-row):hover td { background:#f4f4f8; }
+  .bar-wrap { display:inline-flex; align-items:center; gap:8px; } .bar-wrap .num { font-variant-numeric:tabular-nums; }
+  td.flag { color:#b3261e; font-size:12px; white-space:nowrap; } .muted { color:#898781; font-size:12px; }
+  .heat-wrap { overflow-x:auto; }
+  table.heat { border-collapse:separate; border-spacing:2px; width:auto; font-size:12px; }
+  table.heat th { background:#fff; color:#52514e; font-weight:600; text-align:center; padding:4px 2px; min-width:56px; cursor:default; }
+  table.heat th.heat-co, table.heat td.heat-co { text-align:left; min-width:190px; position:sticky; left:0; background:#fff; z-index:1; }
+  table.heat td.heat-co { white-space:nowrap; padding:0 8px 0 0; border:0; }
+  table.heat td.heat-co .tk { display:inline; margin-left:6px; color:#898781; font-size:11px; }
+  table.heat td.heat-cell { width:60px; height:26px; text-align:center; padding:0 3px; border:0; border-radius:3px; cursor:pointer; font-variant-numeric:tabular-nums; position:relative; }
+  table.heat td.heat-cell.nd { background:#f7f6f3 !important; color:#b0afa8; }
+  table.heat td.heat-cell.na { background:transparent !important; cursor:default; }
+  table.heat td.heat-cell.half::after, .heat-key.half-key::after { content:""; position:absolute; right:2px; top:2px; border-top:6px solid #52514e; border-left:6px solid transparent; }
+  table.heat td.heat-cell.picked { outline:2px solid #0b0b0b; outline-offset:1px; }
+  table.heat td.heat-cell:focus { outline:2px solid var(--navy); }
+  table.heat td.heat-avg, table.heat th.heat-avg { font-weight:600; color:#0b0b0b; border:0; background:#fff; padding-left:10px; font-variant-numeric:tabular-nums; }
+  .heat-legend { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:12px; color:#52514e; margin:10px 0 4px; }
+  .heat-grad { display:inline-block; width:200px; height:10px; border-radius:2px; }
+  .heat-key { display:inline-block; width:18px; height:14px; border-radius:3px; position:relative; margin-left:14px; background:#f7f6f3; color:#b0afa8; font-size:11px; text-align:center; line-height:14px; }
+  .heat-key.half-key { background:#f0efec; }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); gap:10px; margin:6px 0 16px; }
+  .tile { border:1px solid var(--line); padding:10px 12px; }
+  .tile-label { font-size:12px; color:#52514e; } .tile-value { font-size:22px; font-weight:700; color:#0b0b0b; font-variant-numeric:tabular-nums; margin-top:2px; } .tile-sub { font-size:11px; color:#898781; }
+  .drill-chart { overflow-x:auto; }
+  table.drill-table { font-size:12px; margin-top:8px; width:100%; }
+  table.drill-table th { cursor:default; font-size:12px; padding:6px 8px; text-align:left; min-width:0; }
+  table.drill-table td { white-space:normal; text-align:left; vertical-align:top; padding:6px 8px; }
+  table.drill-table td.num { text-align:right; white-space:nowrap; }
+  table.drill-table td.quote { font-style:italic; min-width:280px; } table.drill-table td.src { color:#52514e; font-size:11px; min-width:160px; }
+  .notes { font-size:12px; color:#3a3a36; line-height:1.5; white-space:pre-wrap; } .notes.src { color:#898781; }
+
   .card { border:1px solid var(--line); padding:20px; max-width:820px; margin-bottom:20px; }
   .card h2 { font-size:17px; margin:0 0 12px; color:var(--navy); }
   .card ul { margin:8px 0; padding-left:20px; font-size:13px; }
@@ -114,14 +159,15 @@
     <div><span class="user" id="who"></span><button class="ghost" id="signout">Sign out</button></div>
   </header>
   <nav id="tabs">
-    <button data-tab="dash" class="on">Dashboard</button>
+    <button data-tab="dash" class="on">Summary Results</button>
     <button data-tab="charts">Charts</button>
+    <button data-tab="reserving">Reserving Detail</button>
     <button data-tab="upload" id="uploadTab" class="hidden">Upload data</button>
   </nav>
 
   <section id="dash">
     <p class="sub" id="dataInfo"></p>
-    <div id="noData" class="empty hidden">No data yet. Use <b>Upload data</b> to load the workbook.</div>
+    <div id="noData" class="empty hidden">No data yet. Use <b>Upload data</b> to load the P&amp;C Peer Financials Tracker workbook.</div>
     <div id="dashBody" class="hidden">
       <div class="controls">
         <div class="toggle" id="viewType"></div>
@@ -164,18 +210,36 @@
     <div id="vizArea"></div>
   </section>
 
+  <section id="reserving" class="hidden">
+    <p class="sub" id="resInfo"></p>
+    <div id="resEmpty" class="empty hidden">No reserve data yet. Use <b>Upload data</b> to load the P&amp;C Peer Reserve Development Components workbook.</div>
+    <div id="resBody" class="hidden">
+      <div class="controls">
+        <label>Cohort <select id="rCohort"></select></label>
+        <label>As of <select id="rAsOf"></select></label>
+      </div>
+      <div id="resSummary"></div>
+      <h2 class="section-title">Detail</h2>
+      <div class="controls">
+        <label>Heatmap measure <select id="rMeasure"></select></label>
+        <label>Sort <select id="rSort"><option value="name">Company name</option><option value="avg">Most favorable first</option></select></label>
+      </div>
+      <div id="resArea"></div>
+    </div>
+  </section>
+
   <section id="upload" class="hidden">
     <div class="card">
       <h2>1. Choose the workbook</h2>
       <input type="file" id="file" accept=".xlsx,.xlsm">
-      <p class="sub" style="margin-top:10px">The file is read in your browser. Only the company tabs' figures are saved to the database.</p>
+      <p class="sub" style="margin-top:10px">Choose either workbook: the <b>P&amp;C Peer Financials Tracker</b> (Summary Results and Charts) or the <b>P&amp;C Peer Reserve Development Components</b> workbook (Reserving Detail). The site recognises which one it is. The file is read in your browser and only its figures are saved.</p>
       <div id="preview"></div>
       <button class="primary hidden" id="publish">Publish to dashboard</button>
       <p id="upMsg" class="msg"></p>
     </div>
     <div class="card">
       <h2>Upload history</h2>
-      <table class="hist"><thead><tr><th>When</th><th>File</th><th>By</th></tr></thead><tbody id="history"></tbody></table>
+      <table class="hist"><thead><tr><th>When</th><th>Type</th><th>File</th><th>By</th></tr></thead><tbody id="history"></tbody></table>
     </div>
   </section>
 </div>
@@ -183,7 +247,9 @@
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 import { VIEW_TYPES, METRICS, compute, stats, ranks, latestPeriod } from "./engine.js";
-import { parseWorkbook } from "./parse.js";
+import { parseWorkbook, parseReserveWorkbook, isReserveWorkbook } from "./parse.js";
+import { renderReserves, buildModel, qLabel, MEASURES as R_MEASURES } from "./reserves.js";
+import { renderSummary, COHORTS } from "./reserves_summary.js";
 import { renderCharts, SERIES_COLORS } from "./charts.js";
 
 const $ = (id) => document.getElementById(id);
@@ -197,7 +263,8 @@ if (!cfg.SUPABASE_URL || !cfg.SUPABASE_PUBLISHABLE_KEY || cfg.SUPABASE_PUBLISHAB
 const sb = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY);
 
 const state = { data: null, meta: null, isEditor: false, self: "", view: { type: "Quarterly", fy: null, q: null }, sort: null, parsed: null, tab: "dash",
-  charts: { metric: "cr", metricX: "gpwGrowth", picks: null, slots: {}, shape: "bars", hidden: [] } };
+  charts: { metric: "cr", metricX: "gpwGrowth", picks: null, slots: {}, shape: "bars", hidden: [] },
+  res: null, resMeta: null, rst: { measure: "pct", sort: "name", pick: null, cohort: "all", asOf: null } };
 try { const c = JSON.parse(localStorage.getItem("chartOpts") || "null"); if (c) Object.assign(state.charts, c); } catch {}
 try { const v = JSON.parse(localStorage.getItem("dashView") || "null"); if (v) state.view = v; } catch {}
 
@@ -212,22 +279,33 @@ const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium",
 
 // ---------- Data loading ----------
 async function loadData() {
-  const { data, error } = await sb.from("dash_uploads").select("id, uploaded_at, uploaded_by_email, file_name, data").order("id", { ascending: false }).limit(1);
+  // Newest upload of each kind: the tracker (no kind / "tracker") and the reserve workbook ("reserves").
+  const { data: list, error } = await sb.from("dash_uploads").select("id, uploaded_at, uploaded_by_email, file_name, kind:data->>kind").order("id", { ascending: false }).limit(200);
   if (error) { $("dataInfo").textContent = "Could not load data: " + error.message + " (has setup.sql been run?)"; return; }
-  if (!data.length) { state.data = null; $("noData").classList.remove("hidden"); $("dashBody").classList.add("hidden"); $("dataInfo").textContent = ""; return; }
-  state.data = data[0].data; state.meta = data[0];
-  $("dataInfo").textContent = `Data from ${data[0].file_name || "workbook"}, uploaded ${when(data[0].uploaded_at)}${data[0].uploaded_by_email ? " by " + data[0].uploaded_by_email : ""}.`;
+  const trRow = list.find((r) => !r.kind || r.kind === "tracker"), rsRow = list.find((r) => r.kind === "reserves");
+  const fetchData = async (id) => { const { data, error: e } = await sb.from("dash_uploads").select("data").eq("id", id).single(); if (e) throw e; return data.data; };
+  const info = (r) => `Data from ${r.file_name || "workbook"}, uploaded ${when(r.uploaded_at)}${r.uploaded_by_email ? " by " + r.uploaded_by_email : ""}.`;
+  // reserves
+  try { state.res = rsRow ? await fetchData(rsRow.id) : null; state.resMeta = rsRow || null; }
+  catch (e) { state.res = null; $("resInfo").textContent = "Could not load reserve data: " + e.message; }
+  if (state.res) $("resInfo").textContent = info(rsRow);
+  $("resEmpty").classList.toggle("hidden", !!state.res); $("resBody").classList.toggle("hidden", !state.res);
+  // tracker
+  if (!trRow) { state.data = null; $("noData").classList.remove("hidden"); $("dashBody").classList.add("hidden"); $("dataInfo").textContent = ""; if (state.tab === "reserving") renderReservingTab(); return; }
+  try { state.data = await fetchData(trRow.id); } catch (e) { $("dataInfo").textContent = "Could not load data: " + e.message; return; }
+  state.meta = trRow;
+  $("dataInfo").textContent = info(trRow);
   const { data: s } = await sb.from("dash_settings").select("value").eq("key", "self_ticker").maybeSingle();
   state.self = s?.value || "";
   const years = [...new Set(state.data.periods.map((p) => p.fy))];
   if (!years.includes(state.view.fy)) Object.assign(state.view, latestPeriod(state.data));
   $("noData").classList.add("hidden"); $("dashBody").classList.remove("hidden");
-  renderControls(); render(); if (state.tab === "charts") renderChartsTab();
+  renderControls(); render(); if (state.tab === "charts") renderChartsTab(); if (state.tab === "reserving") renderReservingTab();
 }
 
 async function loadHistory() {
-  const { data } = await sb.from("dash_uploads").select("uploaded_at, file_name, uploaded_by_email").order("id", { ascending: false }).limit(10);
-  $("history").innerHTML = (data || []).map((r) => `<tr><td>${esc(when(r.uploaded_at))}</td><td>${esc(r.file_name)}</td><td>${esc(r.uploaded_by_email)}</td></tr>`).join("") || `<tr><td colspan="3">None yet</td></tr>`;
+  const { data } = await sb.from("dash_uploads").select("uploaded_at, file_name, uploaded_by_email, kind:data->>kind").order("id", { ascending: false }).limit(12);
+  $("history").innerHTML = (data || []).map((r) => `<tr><td>${esc(when(r.uploaded_at))}</td><td>${r.kind === "reserves" ? "Reserves" : "Tracker"}</td><td>${esc(r.file_name)}</td><td>${esc(r.uploaded_by_email)}</td></tr>`).join("") || `<tr><td colspan="4">None yet</td></tr>`;
 }
 
 // ---------- Dashboard ----------
@@ -376,6 +454,34 @@ $("cAdd").addEventListener("change", (e) => { const t = e.target.value; if (t &&
 $("cPicks").addEventListener("click", (e) => { const t = e.target.dataset.rm; if (!t) return; state.charts.picks = state.charts.picks.filter((x) => x !== t); delete state.charts.slots[t]; renderChartsTab(); });
 let resizeTimer; window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (state.tab === "charts") renderChartsTab(); }, 200); });
 
+// ---------- Reserving Detail ----------
+try { const r = JSON.parse(localStorage.getItem("resOpts") || "null"); if (r) Object.assign(state.rst, r); } catch {}
+function renderReservingTab() {
+  if (!state.res) return;
+  $("rMeasure").innerHTML = R_MEASURES.map((m) => `<option value="${m.key}" ${m.key === state.rst.measure ? "selected" : ""}>${esc(m.label)}</option>`).join("");
+  $("rSort").value = state.rst.sort;
+  const trackerNames = state.data ? Object.fromEntries(state.data.companies.map((c) => [c.ticker, c.name])) : {};
+  const st = state.rst, y = window.scrollY;
+  const m = buildModel(state.res, trackerNames);
+  const pidx = (p) => p.fy * 4 + p.q;
+  if (!m.periods.some((p) => pidx(p) === st.asOf)) st.asOf = pidx(m.periods[m.periods.length - 1]);
+  $("rCohort").innerHTML = `<option value="all">All peers</option>` + COHORTS.map((c) => `<option value="${c.key}" ${c.key === st.cohort ? "selected" : ""}>${esc(c.label)}</option>`).join("");
+  $("rAsOf").innerHTML = [...m.periods].reverse().map((p) => `<option value="${pidx(p)}" ${pidx(p) === st.asOf ? "selected" : ""}>${qLabel(p.fy, p.q)}</option>`).join("");
+  const tickers = st.cohort === "all" ? m.tickers : m.tickers.filter((t) => COHORTS.find((c) => c.key === st.cohort).tickers.includes(t));
+  st.tickers = st.cohort === "all" ? null : tickers;
+  const onPick = (p) => { st.pick = p; renderReservingTab(); setTimeout(() => { const d = document.querySelectorAll("#resArea .viz-card")[1]; if (d) d.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); };
+  $("resSummary").replaceChildren();
+  renderSummary($("resSummary"), m, tickers, st, { self: state.self, tracker: state.data, onPick });
+  renderReserves($("resArea"), state.res, st, trackerNames, () => { renderReservingTab(); });
+  window.scrollTo(0, y);
+  try { localStorage.setItem("resOpts", JSON.stringify({ measure: st.measure, sort: st.sort, cohort: st.cohort })); } catch {}
+}
+$("rMeasure").addEventListener("change", (e) => { state.rst.measure = e.target.value; renderReservingTab(); });
+$("rSort").addEventListener("change", (e) => { state.rst.sort = e.target.value; renderReservingTab(); });
+$("rCohort").addEventListener("change", (e) => { state.rst.cohort = e.target.value; renderReservingTab(); });
+$("rAsOf").addEventListener("change", (e) => { state.rst.asOf = +e.target.value; renderReservingTab(); });
+window.addEventListener("resize", () => { clearTimeout(window.__rt); window.__rt = setTimeout(() => { if (state.tab === "reserving") renderReservingTab(); }, 250); });
+
 // ---------- Upload ----------
 let XLSX = null;
 $("file").addEventListener("change", async (e) => {
@@ -385,11 +491,22 @@ $("file").addEventListener("change", async (e) => {
     $("preview").innerHTML = `<p class="sub">Reading ${esc(f.name)}…</p>`;
     XLSX = XLSX || await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");
     const wb = XLSX.read(await f.arrayBuffer(), { type: "array" });
+    if (isReserveWorkbook(wb)) {
+      const parsed = parseReserveWorkbook(XLSX, wb, f.name);
+      state.parsed = parsed;
+      const qs = [...new Set(parsed.balances.map((b) => b.fy * 10 + b.q))].sort((a, b) => a - b);
+      const lab = (k) => `Q${k % 10} ${Math.floor(k / 10)}`;
+      $("preview").innerHTML = `<p><span class="ok">Read OK: reserve workbook.</span> ${new Set(parsed.balances.map((b) => b.ticker)).size} companies, ${parsed.balances.length} Reserve Balances rows and ${parsed.dev.length} Reserve Development rows, ${lab(qs[0])} to ${lab(qs[qs.length - 1])}. This updates the Reserving Detail page only.</p>
+        ${parsed.warnings.length ? `<p class="warn">${parsed.warnings.length} warning(s):</p><ul>${parsed.warnings.slice(0, 30).map((w) => `<li>${esc(w)}</li>`).join("")}</ul>` : ""}`;
+      $("publish").classList.remove("hidden");
+      return;
+    }
     const parsed = parseWorkbook(XLSX, wb, f.name);
+    parsed.kind = "tracker";
     state.parsed = parsed;
     const lp = latestPeriod(parsed);
     const filled = parsed.companies.filter((c) => (c.m.cr || []).some((x) => typeof x === "number")).length;
-    $("preview").innerHTML = `<p><span class="ok">Read OK.</span> ${parsed.companies.length} company tabs found (${filled} with combined ratios entered).
+    $("preview").innerHTML = `<p><span class="ok">Read OK: tracker workbook.</span> ${parsed.companies.length} company tabs found (${filled} with combined ratios entered).
       Periods ${parsed.periods[0].fy} to ${parsed.periods[parsed.periods.length - 1].fy}; latest quarter with data: Q${lp.q} ${lp.fy}.</p>
       ${parsed.warnings.length ? `<p class="warn">${parsed.warnings.length} warning(s):</p><ul>${parsed.warnings.slice(0, 30).map((w) => `<li>${esc(w)}</li>`).join("")}</ul>` : ""}`;
     $("publish").classList.remove("hidden");
@@ -403,7 +520,7 @@ $("publish").addEventListener("click", async () => {
   $("publish").disabled = false;
   if (error) { $("upMsg").textContent = "Upload failed: " + error.message; return; }
   $("publish").classList.add("hidden"); $("file").value = "";
-  $("preview").innerHTML = `<p class="ok">Published. The dashboard now shows this file.</p>`;
+  $("preview").innerHTML = `<p class="ok">Published. ${state.parsed.kind === "reserves" ? "Reserving Detail now shows" : "Summary Results and Charts now show"} this file.</p>`;
   await loadData(); await loadHistory();
 });
 
@@ -412,8 +529,9 @@ $("tabs").addEventListener("click", (e) => {
   const t = e.target.dataset.tab; if (!t) return;
   state.tab = t;
   document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
-  ["dash", "charts", "upload"].forEach((id) => $(id).classList.toggle("hidden", t !== id));
+  ["dash", "charts", "reserving", "upload"].forEach((id) => $(id).classList.toggle("hidden", t !== id));
   if (t === "upload") loadHistory();
+  if (t === "reserving") renderReservingTab();
   if (t === "charts") renderChartsTab();
   if (t === "dash" && state.data) { renderControls(); render(); }
 });

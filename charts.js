@@ -277,3 +277,4 @@ export function renderCharts(container, data, view, opts) {
   scatter(container, data, view, opts.metricX, opts.metric, self, hidden);
 }
 export const SERIES_COLORS = SERIES;
+export { showTip, hideTip, el, text, niceTicks, scale, legend, quantile };
